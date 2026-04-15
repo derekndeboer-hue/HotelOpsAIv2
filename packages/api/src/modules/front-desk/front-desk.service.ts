@@ -7,6 +7,95 @@ import { generateId } from '../../utils/helpers';
 import type { CheckInInput, CheckOutInput, RoomAssignmentInput, WalkInInput } from '@hotel-ops/shared/validators/front-desk';
 import { generateConfirmationNumber } from '../reservations/reservations.service';
 
+// ── Operational KPI ──────────────────────────────────────────────────────────
+
+export async function getOperationalKpi(hotelId: string) {
+  const [occupancyRes, openWORes, avgResponseRes, hkRemainingRes, inspectionRes, staffOnDutyRes] =
+    await Promise.all([
+      // occupancy: % of rooms currently occupied
+      query<{ occupied: string; total: string }>(
+        `SELECT
+           COUNT(*) FILTER (WHERE status = 'occupied') AS occupied,
+           COUNT(*) AS total
+         FROM rooms
+         WHERE hotel_id = $1`,
+        [hotelId],
+      ),
+      // openWorkOrders: WOs not completed or cancelled
+      query<{ count: string }>(
+        `SELECT COUNT(*) AS count
+         FROM work_orders
+         WHERE hotel_id = $1
+           AND status NOT IN ('completed', 'cancelled')`,
+        [hotelId],
+      ),
+      // avgResponseMinutes: avg time from created_at → started_at for WOs created in last 24h
+      query<{ avg_minutes: string | null }>(
+        `SELECT ROUND(
+           AVG(EXTRACT(EPOCH FROM (started_at - created_at)) / 60)
+             FILTER (WHERE started_at IS NOT NULL)
+         ) AS avg_minutes
+         FROM work_orders
+         WHERE hotel_id = $1
+           AND created_at >= NOW() - INTERVAL '24 hours'`,
+        [hotelId],
+      ),
+      // hkRoomsRemaining: assignments today not yet completed
+      query<{ count: string }>(
+        `SELECT COUNT(*) AS count
+         FROM housekeeping_assignments
+         WHERE hotel_id = $1
+           AND date = CURRENT_DATE
+           AND status IN ('assigned', 'in_progress')`,
+        [hotelId],
+      ),
+      // inspectionPassRate: % of today's completed assignments that passed
+      query<{ passed: string; total: string }>(
+        `SELECT
+           COUNT(*) FILTER (WHERE inspection_result = 'pass') AS passed,
+           COUNT(*) AS total
+         FROM housekeeping_assignments
+         WHERE hotel_id = $1
+           AND date = CURRENT_DATE
+           AND status = 'completed'`,
+        [hotelId],
+      ),
+      // staffOnDuty: distinct staff with active WO or HK assignments today
+      query<{ count: string }>(
+        `SELECT COUNT(DISTINCT staff_id) AS count FROM (
+           SELECT assigned_to AS staff_id
+           FROM work_orders
+           WHERE hotel_id = $1
+             AND assigned_to IS NOT NULL
+             AND status IN ('acknowledged', 'in_progress')
+           UNION
+           SELECT assigned_to AS staff_id
+           FROM housekeeping_assignments
+           WHERE hotel_id = $1
+             AND date = CURRENT_DATE
+             AND status IN ('assigned', 'in_progress')
+         ) s`,
+        [hotelId],
+      ),
+    ]);
+
+  const occupied = parseInt(occupancyRes.rows[0]?.occupied ?? '0', 10);
+  const totalRooms = parseInt(occupancyRes.rows[0]?.total ?? '0', 10);
+  const inspPassed = parseInt(inspectionRes.rows[0]?.passed ?? '0', 10);
+  const inspTotal = parseInt(inspectionRes.rows[0]?.total ?? '0', 10);
+
+  return {
+    occupancy: totalRooms > 0 ? Math.round((occupied / totalRooms) * 100) : 0,
+    openWorkOrders: parseInt(openWORes.rows[0]?.count ?? '0', 10),
+    avgResponseMinutes: avgResponseRes.rows[0]?.avg_minutes != null
+      ? parseFloat(avgResponseRes.rows[0].avg_minutes)
+      : 0,
+    hkRoomsRemaining: parseInt(hkRemainingRes.rows[0]?.count ?? '0', 10),
+    inspectionPassRate: inspTotal > 0 ? Math.round((inspPassed / inspTotal) * 100) : null,
+    staffOnDuty: parseInt(staffOnDutyRes.rows[0]?.count ?? '0', 10),
+  };
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 export async function getDashboard(hotelId: string) {

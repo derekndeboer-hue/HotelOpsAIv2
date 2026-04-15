@@ -1,4 +1,5 @@
 import { get, post, put, del } from '@/hooks/useApi';
+import type { OperationalKpi } from '@hotel-ops/shared/validators/front-desk';
 import type {
   User, Room, WorkOrder, HKAssignment, HKDashboardData, Guest, GuestPractice,
   Reservation, Interaction, Equipment, ScheduleEntry,
@@ -200,6 +201,7 @@ const reservations = {
 
 // ── Front Desk ──
 const frontDesk = {
+  operationalKpi: () => get<OperationalKpi>('/front-desk/operational-kpi'),
   dashboard: () => get<Record<string, unknown>>('/front-desk/dashboard'),
   checkIn: (data: Record<string, unknown>) =>
     post<{ reservationId: string; roomNumber: string; status: string; keyCardsIssued: number }>('/front-desk/check-in', data),

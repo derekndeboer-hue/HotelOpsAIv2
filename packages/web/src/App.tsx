@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { ToastProvider } from '@/components/ui/Toast';
+import { FirestoreProvider } from '@/context/FirestoreContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 
@@ -53,8 +54,9 @@ function ProtectedLayout() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <Routes>
+    <FirestoreProvider>
+      <ToastProvider>
+        <Routes>
         {/* Public */}
         <Route path="/login" element={<LoginPage />} />
 
@@ -117,7 +119,8 @@ export default function App() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/staff" element={<StaffManagementPage />} />
         </Route>
-      </Routes>
-    </ToastProvider>
+        </Routes>
+      </ToastProvider>
+    </FirestoreProvider>
   );
 }

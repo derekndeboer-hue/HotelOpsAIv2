@@ -161,6 +161,25 @@ export const reservationFilterSchema = z.object({
   offset: z.coerce.number().int().min(0).optional(),
 });
 
+// ── Operational KPI ──────────────────────────────────────────────────────────
+
+export const operationalKpiResponseSchema = z.object({
+  /** Percentage of rooms currently occupied (0–100) */
+  occupancy: z.number(),
+  /** Count of work orders not yet completed or cancelled */
+  openWorkOrders: z.number(),
+  /** Average minutes from WO created_at to started_at (last 24 h) */
+  avgResponseMinutes: z.number(),
+  /** Count of HK assignments today still pending/in-progress */
+  hkRoomsRemaining: z.number(),
+  /** Percentage of today's completed HK assignments that passed inspection (null = none yet) */
+  inspectionPassRate: z.number().nullable(),
+  /** Count of distinct staff with active work or HK assignments today */
+  staffOnDuty: z.number(),
+});
+
+export type OperationalKpi = z.infer<typeof operationalKpiResponseSchema>;
+
 // ── Inferred types ────────────────────────────────────────────────────────────
 
 export type ReservationStatus = z.infer<typeof reservationStatusEnum>;

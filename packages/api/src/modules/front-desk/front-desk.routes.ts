@@ -15,6 +15,17 @@ const router = Router();
 
 router.use(authenticate, setTenantContext);
 
+// GET /api/front-desk/operational-kpi
+router.get(
+  '/operational-kpi',
+  requirePermission('front_desk.dashboard.view'),
+  asyncHandler(async (req: Request, res: Response) => {
+    const user = (req as AuthenticatedRequest).user;
+    const kpi = await frontDeskService.getOperationalKpi(user.hotelId);
+    res.json(kpi);
+  }),
+);
+
 // GET /api/front-desk/dashboard
 router.get(
   '/dashboard',

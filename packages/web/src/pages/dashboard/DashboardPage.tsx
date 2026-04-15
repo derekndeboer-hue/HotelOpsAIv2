@@ -11,14 +11,15 @@ import { AlertPanel } from '@/components/shared/AlertPanel';
 import { ROOM_STATUS_COLORS, ROOM_STATUS_LABELS } from '@/utils/constants';
 import { formatDuration } from '@/utils/formatters';
 import { cn } from '@/utils/cn';
-import type { DashboardKPI, RoomStatus } from '@/types';
+import type { OperationalKpi } from '@hotel-ops/shared/validators/front-desk';
+import type { RoomStatus } from '@/types';
 
 export function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { alerts } = useAlerts();
   const { rooms } = useRoomBoard();
-  const [kpis, setKpis] = useState<DashboardKPI | null>(null);
+  const [kpis, setKpis] = useState<OperationalKpi | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,9 +33,7 @@ export function DashboardPage() {
   }, [user, navigate]);
 
   useEffect(() => {
-    const to = new Date().toISOString().slice(0, 10);
-    const from = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
-    api.reports.kpi({ from, to }).then((d) => setKpis(d as unknown as DashboardKPI)).catch(console.error).finally(() => setLoading(false));
+    api.frontDesk.operationalKpi().then(setKpis).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   if (loading) {
