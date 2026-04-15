@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
 import { formatDate } from '@/utils/formatters';
 import type { Room } from '@/types';
 
@@ -78,7 +77,7 @@ export function CheckInPage() {
     setSearching(true);
     try {
       const results = await api.reservations.search({ guestName: searchQuery });
-      setReservations((results as ReservationRow[]).filter((r) => ['confirmed', 'pending'].includes(r.status)));
+      setReservations((results as unknown as ReservationRow[]).filter((r) => ['confirmed', 'pending'].includes(r.status)));
     } catch (err) {
       console.error(err);
     } finally {

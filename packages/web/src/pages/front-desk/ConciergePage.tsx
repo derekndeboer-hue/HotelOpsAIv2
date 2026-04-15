@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, MapPin, Phone, Globe, Star } from 'lucide-react';
+import { MapPin, Phone, Globe, Star } from 'lucide-react';
 import { api } from '@/services/api';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';

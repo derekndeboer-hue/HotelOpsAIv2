@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wrench, Clock, AlertTriangle, Users, Plus } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Wrench, Clock, AlertTriangle, Plus } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from '@/services/api';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { WorkOrderCard } from '@/components/shared/WorkOrderCard';
 import { formatDuration } from '@/utils/formatters';
@@ -30,14 +29,14 @@ export function MaintenanceDashboardPage() {
   }
 
   // Chart data for WOs by priority
-  const priorityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
-  queue.forEach(wo => { priorityCounts[wo.priority]++; });
+  const priorityCounts: Record<string, number> = { urgent: 0, high: 0, medium: 0, low: 0 };
+  queue.forEach(wo => { priorityCounts[wo.priority] = (priorityCounts[wo.priority] ?? 0) + 1; });
 
   const chartData = [
-    { name: 'Critical', count: priorityCounts.critical, fill: '#dc2626' },
-    { name: 'High', count: priorityCounts.high, fill: '#f97316' },
-    { name: 'Medium', count: priorityCounts.medium, fill: '#fbbf24' },
-    { name: 'Low', count: priorityCounts.low, fill: '#93c5fd' },
+    { name: 'Urgent', count: priorityCounts['urgent'], fill: '#dc2626' },
+    { name: 'High', count: priorityCounts['high'], fill: '#f97316' },
+    { name: 'Medium', count: priorityCounts['medium'], fill: '#fbbf24' },
+    { name: 'Low', count: priorityCounts['low'], fill: '#93c5fd' },
   ];
 
   const overdueWOs = queue.filter(wo => wo.status === 'open' || wo.status === 'assigned');

@@ -28,7 +28,7 @@ export function LaborReportPage() {
     if (from > to) return;
     setLoading(true);
     setError(false);
-    (api.reports.labor({ from, to }) as Promise<LaborReport>)
+    (api.reports.labor({ from, to }) as unknown as Promise<LaborReport>)
       .then(setReport)
       .catch(() => setError(true))
       .finally(() => setLoading(false));

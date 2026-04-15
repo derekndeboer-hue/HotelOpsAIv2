@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore';
 import { useFirestore } from '@/context/FirestoreContext';
 import { useAuth } from '@/context/AuthContext';
-import type { Alert } from '@/types';
+import type { Alert, WOPriority } from '@/types';
 
-const PRIORITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
+const PRIORITY_ORDER: Record<WOPriority, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
 
 export function useAlerts() {
   const { db } = useFirestore();
@@ -13,7 +13,7 @@ export function useAlerts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) return;
 
     const colPath = `hotels/${user.tenantId}_${user.hotelId}/alerts`;
     const q = query(

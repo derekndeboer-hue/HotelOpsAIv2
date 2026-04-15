@@ -28,7 +28,7 @@ export function OccupancyReportPage() {
     if (from > to) return;
     setLoading(true);
     setError(false);
-    (api.reports.occupancy({ from, to }) as Promise<OccupancyRow[]>)
+    (api.reports.occupancy({ from, to }) as unknown as Promise<OccupancyRow[]>)
       .then(setRows)
       .catch(() => setError(true))
       .finally(() => setLoading(false));

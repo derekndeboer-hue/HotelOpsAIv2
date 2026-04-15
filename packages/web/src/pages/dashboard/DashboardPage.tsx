@@ -14,7 +14,7 @@ import { cn } from '@/utils/cn';
 import type { DashboardKPI, RoomStatus } from '@/types';
 
 export function DashboardPage() {
-  const { user, hasRole } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { alerts } = useAlerts();
   const { rooms } = useRoomBoard();

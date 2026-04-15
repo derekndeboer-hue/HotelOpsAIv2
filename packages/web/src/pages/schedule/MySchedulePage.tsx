@@ -3,7 +3,7 @@ import { Play, CheckCircle, Clock, LogIn, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
-import { Card, CardHeader } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
@@ -11,7 +11,7 @@ import { cn } from '@/utils/cn';
 import type { ScheduleEntry } from '@/types';
 
 export function MySchedulePage() {
-  const { user } = useAuth();
+  useAuth();
   const [entries, setEntries] = useState<ScheduleEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [clockedIn, setClockedIn] = useState(false);

@@ -11,7 +11,7 @@ export function useNotifications() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) return;
 
     const colPath = `hotels/${user.tenantId}_${user.hotelId}/notifications`;
     const q = query(
@@ -40,7 +40,7 @@ export function useNotifications() {
 
   const markAsRead = useCallback(
     async (notificationId: string) => {
-      if (!user) return;
+      if (!user || !db) return;
       const colPath = `hotels/${user.tenantId}_${user.hotelId}/notifications`;
       await updateDoc(doc(db, colPath, notificationId), { read: true });
     },

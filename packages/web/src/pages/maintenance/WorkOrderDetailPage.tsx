@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Clock, Wrench, MessageSquare, Camera } from 'lucide-react';
+import { ArrowLeft, Send, MessageSquare } from 'lucide-react';
 import { api } from '@/services/api';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -8,10 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { TimelineEntry } from '@/components/shared/TimelineEntry';
-import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { PRIORITY_COLORS } from '@/utils/constants';
 import { formatDateTime, formatRelativeTime } from '@/utils/formatters';
-import { cn } from '@/utils/cn';
 import type { WorkOrder, WOStatus } from '@/types';
 
 const STATUS_OPTIONS: { value: WOStatus; label: string }[] = [
@@ -69,8 +67,6 @@ export function WorkOrderDetailPage() {
     return <div className="page-container text-sm text-gray-500">Work order not found</div>;
   }
 
-  const pColors = PRIORITY_COLORS[wo.priority];
-
   return (
     <div className="page-container max-w-4xl">
       <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
@@ -113,24 +109,27 @@ export function WorkOrderDetailPage() {
           </Card>
 
           {/* Photos */}
-          {wo.photos.length > 0 && (
+          {(wo.photos?.length ?? 0) > 0 && (
             <Card>
               <CardHeader title="Photos" />
               <div className="flex flex-wrap gap-3">
-                {wo.photos.map((url, i) => (
-                  <a key={i} href={url} target="_blank" rel="noreferrer" className="block h-24 w-24 overflow-hidden rounded-lg border border-gray-200">
-                    <img src={url} alt="" className="h-full w-full object-cover" />
-                  </a>
-                ))}
+                {wo.photos?.map((p, i) => {
+                  const url = typeof p === 'string' ? p : p.url;
+                  return (
+                    <a key={i} href={url} target="_blank" rel="noreferrer" className="block h-24 w-24 overflow-hidden rounded-lg border border-gray-200">
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                    </a>
+                  );
+                })}
               </div>
             </Card>
           )}
 
           {/* Comments / Timeline */}
           <Card>
-            <CardHeader title="Comments" subtitle={`${wo.comments.length} comments`} />
+            <CardHeader title="Comments" subtitle={`${wo.comments?.length ?? 0} comments`} />
             <div className="space-y-1">
-              {wo.comments.map(c => (
+              {wo.comments?.map(c => (
                 <TimelineEntry
                   key={c.id}
                   icon={<MessageSquare className="h-4 w-4" />}
@@ -179,7 +178,7 @@ export function WorkOrderDetailPage() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Updated</dt>
-                <dd className="text-gray-700">{formatRelativeTime(wo.updatedAt)}</dd>
+                <dd className="text-gray-700">{formatRelativeTime(wo.updatedAt ?? wo.createdAt)}</dd>
               </div>
               {wo.completedAt && (
                 <div className="flex justify-between">

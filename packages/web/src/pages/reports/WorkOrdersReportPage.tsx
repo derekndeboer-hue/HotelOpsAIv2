@@ -70,7 +70,7 @@ export function WorkOrdersReportPage() {
     if (from > to) return;
     setLoading(true);
     setError(false);
-    (api.reports.workOrders({ from, to }) as Promise<WOReport>)
+    (api.reports.workOrders({ from, to }) as unknown as Promise<WOReport>)
       .then(setReport)
       .catch(() => setError(true))
       .finally(() => setLoading(false));

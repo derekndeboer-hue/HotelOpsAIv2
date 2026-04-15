@@ -1,8 +1,8 @@
 import { get, post, put, del } from '@/hooks/useApi';
 import type {
   User, Room, WorkOrder, HKAssignment, HKDashboardData, Guest, GuestPractice,
-  Reservation, FDDashboardData, Interaction, Equipment, ScheduleEntry,
-  StaffMember, ComplianceItem, DashboardKPI, ReportData, ConciergeEntry,
+  Reservation, Interaction, Equipment, ScheduleEntry,
+  StaffMember, ComplianceItem, ReportData, ConciergeEntry,
   ConciergeInquiry, WOPriority, WOCategory, WOStatus, RoomStatus, HotelLocation,
 } from '@/types';
 
@@ -209,6 +209,8 @@ const frontDesk = {
     post<{ reservationId: string; roomId: string; roomNumber: string }>('/front-desk/assign-room', data),
   walkIn: (data: Record<string, unknown>) =>
     post<{ guestId: string; reservationId: string; confirmationNumber: string; roomNumber: string; status: string }>('/front-desk/walk-in', data),
+  interactions: (params: { guestId: string }) =>
+    get<Interaction[]>('/front-desk/interactions', { params }),
   handoff: {
     list: () => get<Record<string, unknown>[]>('/front-desk/handoff'),
     generate: (data: { shift: string; notes: string }) =>
@@ -258,7 +260,7 @@ const reports = {
     params: RangeParams & { format: 'csv' | 'json' },
   ) => {
     const url = `/api/reports/${reportType}/export?` +
-      new URLSearchParams(params as Record<string, string>).toString();
+      new URLSearchParams(params as unknown as Record<string, string>).toString();
     window.open(url, '_blank');
   },
 };

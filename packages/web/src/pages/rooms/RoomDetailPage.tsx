@@ -3,14 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Wrench, Clock, ChevronRight } from 'lucide-react';
 import { api } from '@/services/api';
 import { Card, CardHeader } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { TimelineEntry } from '@/components/shared/TimelineEntry';
 import { WorkOrderCard } from '@/components/shared/WorkOrderCard';
 import { ROOM_STATUS_LABELS } from '@/utils/constants';
-import { formatDateTime } from '@/utils/formatters';
 import type { Room, WorkOrder, RoomStatus } from '@/types';
 
 const PIPELINE_STEPS: RoomStatus[] = [
@@ -34,7 +32,7 @@ export function RoomDetailPage() {
     ])
       .then(([r, wos, pl]) => {
         setRoom(r);
-        setWorkOrders(wos);
+        setWorkOrders(wos.items ?? []);
         setPipeline(pl);
       })
       .catch(console.error)

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Sparkles, Clock, CheckCircle, AlertTriangle, Ban } from 'lucide-react';
+import { Sparkles, Clock, CheckCircle, Ban } from 'lucide-react';
 import { api } from '@/services/api';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';

@@ -12,7 +12,7 @@ export function useRoomBoard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) return;
 
     const colPath = `hotels/${user.tenantId}_${user.hotelId}/rooms`;
     const q = query(collection(db, colPath), orderBy('number'));

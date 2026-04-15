@@ -37,7 +37,7 @@ export function ResponseTimesReportPage() {
     if (from > to) return;
     setLoading(true);
     setError(false);
-    (api.reports.responseTimes({ from, to }) as Promise<RTReport>)
+    (api.reports.responseTimes({ from, to }) as unknown as Promise<RTReport>)
       .then(setReport)
       .catch(() => setError(true))
       .finally(() => setLoading(false));

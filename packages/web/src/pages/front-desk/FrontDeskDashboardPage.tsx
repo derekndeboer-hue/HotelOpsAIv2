@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { ROOM_STATUS_COLORS, ROOM_STATUS_LABELS } from '@/utils/constants';
 import { cn } from '@/utils/cn';
+import type { RoomStatus } from '@/types';
 
 interface DashboardData {
   arrivals: any[];
@@ -35,7 +36,7 @@ export function FrontDeskDashboardPage() {
 
   useEffect(() => {
     api.frontDesk.dashboard()
-      .then((d) => setData(d as DashboardData))
+      .then((d) => setData(d as unknown as DashboardData))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -76,12 +77,13 @@ export function FrontDeskDashboardPage() {
       {/* Room status summary */}
       <div className="mb-6 flex flex-wrap gap-2">
         {Object.entries(data.roomsSummary).map(([status, count]) => {
-          const colors = ROOM_STATUS_COLORS[status as any];
+          const s = status as RoomStatus;
+          const colors = ROOM_STATUS_COLORS[s];
           return (
             <div key={status} className={cn('flex items-center gap-1.5 rounded-full px-3 py-1', colors?.bg ?? 'bg-gray-100')}>
               <span className={cn('h-2 w-2 rounded-full', colors?.dot ?? 'bg-gray-400')} />
               <span className={cn('text-xs font-semibold', colors?.text ?? 'text-gray-700')}>
-                {ROOM_STATUS_LABELS[status as any] ?? status.replace(/_/g, ' ')}: {count}
+                {ROOM_STATUS_LABELS[s] ?? status.replace(/_/g, ' ')}: {count}
               </span>
             </div>
           );

@@ -39,7 +39,7 @@ export function ReportsDashboardPage() {
     setError(false);
     api.reports
       .kpi({ from, to })
-      .then((d) => setKpi(d as KpiData))
+      .then((d) => setKpi(d as unknown as KpiData))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [from, to]);

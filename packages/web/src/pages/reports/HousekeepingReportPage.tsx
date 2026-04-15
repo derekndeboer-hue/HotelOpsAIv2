@@ -29,7 +29,7 @@ export function HousekeepingReportPage() {
     if (from > to) return;
     setLoading(true);
     setError(false);
-    (api.reports.housekeeping({ from, to }) as Promise<HKReport>)
+    (api.reports.housekeeping({ from, to }) as unknown as Promise<HKReport>)
       .then(setReport)
       .catch(() => setError(true))
       .finally(() => setLoading(false));

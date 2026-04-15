@@ -6,7 +6,6 @@ import { Card, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
-import { formatDate } from '@/utils/formatters';
 
 interface DepartureRow {
   id: string;

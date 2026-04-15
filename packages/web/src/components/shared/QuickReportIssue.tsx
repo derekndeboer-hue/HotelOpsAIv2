@@ -19,7 +19,7 @@ export function QuickReportIssue() {
       const wo = await api.workOrders.create({
         title: description.slice(0, 60),
         description,
-        category: 'other',
+        category: 'general',
         priority: urgent ? 'high' : 'medium',
       });
       if (files.length > 0) {

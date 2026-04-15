@@ -29,7 +29,7 @@ export function GuestRequestsReportPage() {
     if (from > to) return;
     setLoading(true);
     setError(false);
-    (api.reports.guestRequests({ from, to }) as Promise<GRReport>)
+    (api.reports.guestRequests({ from, to }) as unknown as Promise<GRReport>)
       .then(setReport)
       .catch(() => setError(true))
       .finally(() => setLoading(false));

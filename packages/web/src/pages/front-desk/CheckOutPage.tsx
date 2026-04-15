@@ -49,7 +49,7 @@ export function CheckOutPage() {
     setSearching(true);
     try {
       const results = await api.reservations.search({ guestName: searchQuery });
-      setReservations((results as CheckedInRow[]).filter((r: any) => r.status === 'checked_in'));
+      setReservations((results as unknown as CheckedInRow[]).filter((r: any) => r.status === 'checked_in'));
     } catch (err) {
       console.error(err);
     } finally {
