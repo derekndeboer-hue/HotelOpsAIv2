@@ -774,7 +774,7 @@ export async function handleDND(
   tenantId: string,
   hotelId: string,
   assignmentId: string,
-  staffId: string,
+  _staffId: string,
   attemptNumber: number,
 ) {
   return withTransaction(tenantId, async (client) => {

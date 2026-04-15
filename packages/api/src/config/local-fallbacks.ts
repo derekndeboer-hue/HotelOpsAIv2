@@ -47,15 +47,15 @@ class LocalFirestoreClient {
     }
   }
 
-  async publishAlert(tenantId: string, hotelId: string, alert: AlertData): Promise<void> {
+  async publishAlert(_tenantId: string, _hotelId: string, alert: AlertData): Promise<void> {
     if (isLocalDev) {
       console.log(`[Firestore:local] Alert published:`, JSON.stringify(alert));
     }
   }
 
   async updatePresence(
-    tenantId: string,
-    hotelId: string,
+    _tenantId: string,
+    _hotelId: string,
     staffId: string,
     data: PresenceData,
   ): Promise<void> {

@@ -39,7 +39,7 @@ export interface MessageTemplate {
  * No external messaging system involved.
  */
 export class ManualAdapter implements MessagingAdapter {
-  async sendMessage(guestId: string, message: string, channel?: string): Promise<MessageResult> {
+  async sendMessage(_guestId: string, _message: string, channel?: string): Promise<MessageResult> {
     // In manual mode, messages are logged but delivered by staff in person or by phone
     return {
       messageId: `manual-${Date.now()}`,
@@ -94,12 +94,12 @@ export class ManualAdapter implements MessagingAdapter {
  *   7. Support channels: SMS, WhatsApp, in-app
  */
 export class AkiaAdapter implements MessagingAdapter {
-  private apiKey: string;
-  private propertyId: string;
+  private _apiKey: string;
+  private _propertyId: string;
 
   constructor(apiKey: string, propertyId: string) {
-    this.apiKey = apiKey;
-    this.propertyId = propertyId;
+    this._apiKey = apiKey;
+    this._propertyId = propertyId;
   }
 
   async sendMessage(_guestId: string, _message: string, _channel?: string): Promise<MessageResult> {

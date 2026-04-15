@@ -1,4 +1,4 @@
-import { query, withTransaction } from '../../config/database';
+import { query } from '../../config/database';
 import { updateStaffPresence, updateRoomInFirestore } from '../../config/firestore';
 import { publishEvent, TOPICS } from '../../config/pubsub';
 import { AppError } from '../../middleware/error';
@@ -35,7 +35,7 @@ export async function generateEngineeringSchedule(
   tenantId: string,
   hotelId: string,
   date: string,
-  userId: string
+  _userId: string
 ) {
   // Get available engineers
   const engineers = await query(
@@ -118,7 +118,7 @@ export async function generateHousekeepingSchedule(
   tenantId: string,
   hotelId: string,
   date: string,
-  userId: string
+  _userId: string
 ) {
   // Get available housekeepers
   const housekeepers = await query(
@@ -229,7 +229,7 @@ export async function getMySchedule(tenantId: string, staffId: string, date: str
 export async function updateTaskStatus(
   tenantId: string,
   taskId: string,
-  staffId: string,
+  _staffId: string,
   status: string,
   data: { notes?: string; photoUrl?: string } = {}
 ) {

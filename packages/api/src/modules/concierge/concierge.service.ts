@@ -1,5 +1,4 @@
 import { query } from '../../config/database';
-import { AppError } from '../../middleware/error';
 import { generateId } from '../../utils/helpers';
 
 /**

@@ -119,7 +119,7 @@ export async function updateComplianceItem(
  */
 export async function recordCompletion(
   tenantId: string,
-  hotelId: string,
+  _hotelId: string,
   itemId: string,
   userId: string,
   data: { notes?: string; photoUrl?: string }

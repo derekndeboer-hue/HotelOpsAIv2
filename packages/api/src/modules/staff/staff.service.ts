@@ -166,9 +166,9 @@ export async function deleteStaff(tenantId: string, staffId: string) {
  *   4. Return { created, updated, errors }
  */
 export async function importRoster(
-  tenantId: string,
-  hotelId: string,
-  csvData: string
+  _tenantId: string,
+  _hotelId: string,
+  _csvData: string
 ) {
   // TODO: Implement CSV parsing and import
   return {

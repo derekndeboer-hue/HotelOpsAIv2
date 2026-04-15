@@ -48,7 +48,6 @@ router.get(
   '/:id',
   requirePermission('reservations.view'),
   asyncHandler(async (req: Request, res: Response) => {
-    const user = (req as AuthenticatedRequest).user;
     const reservation = await reservationsService.getReservation(req.params.id);
     res.json(reservation);
   }),

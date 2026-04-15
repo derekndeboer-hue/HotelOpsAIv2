@@ -41,9 +41,9 @@ export async function getGuestProfile(guestId: string) {
       [guestId],
     ),
     query<any>(
-      `SELECT id, practice_type, description, triggered_by, is_active, created_at
+      `SELECT id, category, key, value, confidence, source, noted_by, created_at
        FROM guest_practices
-       WHERE guest_id = $1 AND is_active = true
+       WHERE guest_id = $1
        ORDER BY created_at DESC`,
       [guestId],
     ),
@@ -139,22 +139,34 @@ export async function addPractice(
   guestId: string,
   data: { practiceType: string; description: string; triggeredBy?: string },
 ) {
+  // Resolve tenant_id from guest record (required by RLS policy)
+  const guestRow = await query<any>(`SELECT tenant_id FROM guests WHERE id = $1 LIMIT 1`, [guestId]);
+  const tenantId = guestRow.rows[0]?.tenant_id ?? null;
+
   const id = generateId();
   await query(
     `INSERT INTO guest_practices (
-      id, guest_id, practice_type, description,
-      triggered_by, is_active, created_at
-    ) VALUES ($1, $2, $3, $4, $5, true, NOW())`,
-    [id, guestId, data.practiceType, data.description, data.triggeredBy ?? null],
+      id, tenant_id, guest_id, category, key, value,
+      source, noted_by, created_at, updated_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, NULL, NOW(), NOW())`,
+    [
+      id,
+      tenantId,
+      guestId,
+      data.practiceType,   // category
+      'note',              // key — free-text description stored under generic key
+      data.description,    // value
+      data.triggeredBy ?? null, // source
+    ],
   );
-  return { id, ...data, isActive: true };
+  return { id, category: data.practiceType, key: 'note', value: data.description, source: data.triggeredBy ?? null };
 }
 
 export async function getPractices(guestId: string) {
   const result = await query<any>(
-    `SELECT id, practice_type, description, triggered_by, is_active, created_at
+    `SELECT id, category, key, value, confidence, source, noted_by, created_at
      FROM guest_practices
-     WHERE guest_id = $1 AND is_active = true
+     WHERE guest_id = $1
      ORDER BY created_at DESC`,
     [guestId],
   );
