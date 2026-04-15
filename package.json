@@ -1,0 +1,37 @@
+{
+  "name": "hotel-ops",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloud-native hotel operations platform",
+  "workspaces": [
+    "packages/shared",
+    "packages/api",
+    "packages/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev -w packages/api",
+    "dev:web": "npm run dev -w packages/web",
+    "build": "npm run build --workspaces",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"packages/**/*.{ts,tsx,json}\"",
+    "format:check": "prettier --check \"packages/**/*.{ts,tsx,json}\"",
+    "test": "npm run test --workspaces --if-present",
+    "test:api": "npm run test -w packages/api",
+    "test:web": "npm run test -w packages/web",
+    "typecheck": "tsc --noEmit -p packages/shared/tsconfig.json && tsc --noEmit -p packages/api/tsconfig.json && tsc --noEmit -p packages/web/tsconfig.json",
+    "migrate": "node infrastructure/sql/run-migrations.js",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0"
+  }
+}

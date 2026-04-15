@@ -1,0 +1,76 @@
+apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+  name: hotel-ops-pipeline
+description: Hotel Operations Platform delivery pipeline
+serialPipeline:
+  stages:
+    - targetId: staging
+      profiles: [staging]
+      strategy:
+        canary:
+          runtimeConfig:
+            cloudRun:
+              automaticTrafficControl: true
+          canaryDeployment:
+            percentages: [10, 50]
+            verify: true
+      deployParameters:
+        - values:
+            minInstances: "0"
+            maxInstances: "5"
+    - targetId: production
+      profiles: [production]
+      strategy:
+        canary:
+          runtimeConfig:
+            cloudRun:
+              automaticTrafficControl: true
+          canaryDeployment:
+            percentages: [10, 50]
+            verify: true
+          rollbackConfig:
+            rollbackCondition:
+              metricName: "run.googleapis.com/request_count"
+              threshold: 0.01
+      deployParameters:
+        - values:
+            minInstances: "1"
+            maxInstances: "10"
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: staging
+description: Staging environment
+run:
+  location: projects/PROJECT_ID/locations/us-central1
+deployParameters:
+  customTarget/environment: staging
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: production
+description: Production environment
+run:
+  location: projects/PROJECT_ID/locations/us-central1
+deployParameters:
+  customTarget/environment: production
+requireApproval: true
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Automation
+metadata:
+  name: auto-rollback-production
+description: Auto-rollback on high error rate
+selector:
+  targets:
+    - id: production
+rules:
+  - rollbackRule:
+      name: error-rate-rollback
+      condition:
+        metricName: "custom.googleapis.com/cloud_run/error_rate"
+        threshold: 0.01
+      actions: [ROLLBACK]

@@ -1,0 +1,11 @@
+# Default owners for everything
+* @hotel-ops/core-team
+
+# Backend API
+packages/api/ @hotel-ops/backend
+
+# Frontend web app
+packages/web/ @hotel-ops/frontend
+
+# Infrastructure and deployment
+infrastructure/ @hotel-ops/devops

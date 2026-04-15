@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default: deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Tenant-isolated hotel data
+    match /hotels/{tenantHotelId}/{document=**} {
+      // Users can only access data for hotels they belong to
+      allow read: if request.auth != null
+        && request.auth.token.tenantHotelId == tenantHotelId;
+
+      allow write: if request.auth != null
+        && request.auth.token.tenantHotelId == tenantHotelId
+        && request.auth.token.role in ['admin', 'manager', 'staff'];
+
+      // Admin-only operations on hotel root document
+      match /{tenantHotelId} {
+        allow update: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId
+          && request.auth.token.role == 'admin';
+        allow delete: if false; // Never allow hotel deletion from client
+      }
+
+      // Room status subcollection
+      match /rooms/{roomId} {
+        allow read: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId;
+        allow write: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId
+          && request.auth.token.role in ['admin', 'manager', 'staff'];
+      }
+
+      // Work orders subcollection
+      match /workOrders/{orderId} {
+        allow read: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId;
+        allow create: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId;
+        allow update: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId
+          && request.auth.token.role in ['admin', 'manager', 'maintenance'];
+        allow delete: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId
+          && request.auth.token.role == 'admin';
+      }
+
+      // Schedules subcollection
+      match /schedules/{scheduleId} {
+        allow read: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId;
+        allow write: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId
+          && request.auth.token.role in ['admin', 'manager'];
+      }
+
+      // Notifications subcollection
+      match /notifications/{notificationId} {
+        allow read: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId;
+        allow create: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId
+          && request.auth.token.role in ['admin', 'manager'];
+        allow update: if request.auth != null
+          && request.auth.token.tenantHotelId == tenantHotelId
+          && resource.data.userId == request.auth.uid;
+        allow delete: if false;
+      }
+    }
+  }
+}
