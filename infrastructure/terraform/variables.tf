@@ -25,6 +25,7 @@ variable "db_tier" {
 }
 
 variable "domain" {
-  description = "Custom domain for the application"
+  description = "Custom domain for the application. Leave empty to defer LB, SSL, and domain-dependent monitoring resources."
   type        = string
+  default     = ""
 }

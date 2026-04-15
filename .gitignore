@@ -14,6 +14,7 @@ Thumbs.db
 .gcloud/
 .terraform/
 terraform.tfstate*
+*.tfplan
 *.tfvars
 !*.tfvars.example
 .vscode/

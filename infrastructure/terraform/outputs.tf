@@ -4,8 +4,8 @@ output "api_url" {
 }
 
 output "web_url" {
-  description = "Web application URL"
-  value       = "https://${var.domain}"
+  description = "Web application URL (empty until domain is configured)"
+  value       = var.domain != "" ? "https://${var.domain}" : ""
 }
 
 output "sql_connection_name" {

@@ -13,7 +13,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "hotel-ops-terraform-state"
+    bucket = "hotelopsai-prod-tfstate"
     prefix = "terraform/state"
   }
 }

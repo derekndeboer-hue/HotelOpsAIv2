@@ -1,5 +1,10 @@
-# Uptime check on /api/health
+locals {
+  monitoring_domain_enabled = var.domain != "" ? 1 : 0
+}
+
+# Uptime check on /api/health — requires a real hostname; deferred until domain is set
 resource "google_monitoring_uptime_check_config" "api_health" {
+  count        = local.monitoring_domain_enabled
   display_name = "Hotel Ops API Health Check"
   timeout      = "10s"
   period       = "60s"
@@ -20,8 +25,9 @@ resource "google_monitoring_uptime_check_config" "api_health" {
   }
 }
 
-# Notification channel (email)
+# Notification channel (email) — deferred with uptime check; alert policies reference it
 resource "google_monitoring_notification_channel" "email" {
+  count        = local.monitoring_domain_enabled
   display_name = "Hotel Ops Alerts Email"
   type         = "email"
 
@@ -32,6 +38,7 @@ resource "google_monitoring_notification_channel" "email" {
 
 # Alert: High error rate (>1%)
 resource "google_monitoring_alert_policy" "error_rate" {
+  count        = local.monitoring_domain_enabled
   display_name = "Hotel Ops - High Error Rate"
   combiner     = "OR"
 
@@ -53,7 +60,7 @@ resource "google_monitoring_alert_policy" "error_rate" {
     }
   }
 
-  notification_channels = [google_monitoring_notification_channel.email.id]
+  notification_channels = [google_monitoring_notification_channel.email[0].id]
 
   alert_strategy {
     auto_close = "1800s"
@@ -62,6 +69,7 @@ resource "google_monitoring_alert_policy" "error_rate" {
 
 # Alert: High latency (p99 > 2s)
 resource "google_monitoring_alert_policy" "latency" {
+  count        = local.monitoring_domain_enabled
   display_name = "Hotel Ops - High Latency"
   combiner     = "OR"
 
@@ -83,7 +91,7 @@ resource "google_monitoring_alert_policy" "latency" {
     }
   }
 
-  notification_channels = [google_monitoring_notification_channel.email.id]
+  notification_channels = [google_monitoring_notification_channel.email[0].id]
 
   alert_strategy {
     auto_close = "1800s"
@@ -92,6 +100,7 @@ resource "google_monitoring_alert_policy" "latency" {
 
 # Alert: High CPU utilization (>80%)
 resource "google_monitoring_alert_policy" "cpu" {
+  count        = local.monitoring_domain_enabled
   display_name = "Hotel Ops - High CPU Utilization"
   combiner     = "OR"
 
@@ -113,7 +122,7 @@ resource "google_monitoring_alert_policy" "cpu" {
     }
   }
 
-  notification_channels = [google_monitoring_notification_channel.email.id]
+  notification_channels = [google_monitoring_notification_channel.email[0].id]
 
   alert_strategy {
     auto_close = "1800s"
@@ -152,11 +161,12 @@ resource "google_billing_budget" "hotel_ops" {
   }
 
   all_updates_rule {
-    monitoring_notification_channels = [google_monitoring_notification_channel.email.id]
+    # Deferred: notification channel only exists when domain is set
+    monitoring_notification_channels = local.monitoring_domain_enabled == 1 ? [google_monitoring_notification_channel.email[0].id] : []
   }
 }
 
 data "google_billing_account" "account" {
-  open            = true
-  display_name    = "My Billing Account"
+  open         = true
+  display_name = "My Billing Account"
 }
