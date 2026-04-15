@@ -1,46 +1,37 @@
-substitutions:
-  _REGISTRY: us-central1-docker.pkg.dev/${PROJECT_ID}/hotel-ops
-  _WEB_BUCKET: ${PROJECT_ID}-hotel-ops-web
-
 timeout: 1200s
 
 steps:
-  # Install dependencies
   - id: install
     name: node:20
     entrypoint: npm
     args: ['ci']
 
-  # Lint
   - id: lint
     name: node:20
     entrypoint: npm
     args: ['run', 'lint']
     waitFor: ['install']
 
-  # Type check
   - id: typecheck
     name: node:20
     entrypoint: npm
     args: ['run', 'typecheck']
     waitFor: ['install']
 
-  # Test
   - id: test
     name: node:20
     entrypoint: npm
     args: ['run', 'test']
     waitFor: ['install']
 
-  # Docker build and push API
   - id: docker-build-push
     name: gcr.io/cloud-builders/docker
     args:
       - build
       - -t
-      - ${_REGISTRY}/hotel-api:${SHORT_SHA}
+      - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api:$SHORT_SHA
       - -t
-      - ${_REGISTRY}/hotel-api:latest
+      - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api:latest
       - -f
       - packages/api/Dockerfile
       - .
@@ -51,17 +42,15 @@ steps:
     args:
       - push
       - --all-tags
-      - ${_REGISTRY}/hotel-api
+      - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api
     waitFor: ['docker-build-push']
 
-  # Build web app
   - id: web-build
     name: node:20
     entrypoint: npm
     args: ['run', 'build:web']
     waitFor: ['lint', 'typecheck', 'test']
 
-  # Deploy web to Cloud Storage
   - id: web-deploy
     name: gcr.io/cloud-builders/gsutil
     args:
@@ -70,12 +59,12 @@ steps:
       - -r
       - -d
       - packages/web/dist
-      - gs://${_WEB_BUCKET}
+      - gs://$PROJECT_ID-hotel-ops-web
     waitFor: ['web-build']
 
 images:
-  - ${_REGISTRY}/hotel-api:${SHORT_SHA}
-  - ${_REGISTRY}/hotel-api:latest
+  - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api:$SHORT_SHA
+  - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api:latest
 
 options:
   logging: CLOUD_LOGGING_ONLY
