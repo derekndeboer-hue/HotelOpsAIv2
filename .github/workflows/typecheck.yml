@@ -13,8 +13,10 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - name: Typecheck shared
-        run: npx tsc --noEmit -p packages/shared/tsconfig.json
+      - name: Build shared declarations
+        # api and web use project references to shared; shared must emit .d.ts
+        # before downstream --noEmit checks can resolve its types.
+        run: npx tsc -p packages/shared/tsconfig.json
       - name: Typecheck api
         run: npx tsc --noEmit -p packages/api/tsconfig.json
       - name: Typecheck web
