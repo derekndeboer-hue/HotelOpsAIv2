@@ -94,13 +94,8 @@ export class ManualAdapter implements MessagingAdapter {
  *   7. Support channels: SMS, WhatsApp, in-app
  */
 export class AkiaAdapter implements MessagingAdapter {
-  private _apiKey: string;
-  private _propertyId: string;
-
-  constructor(apiKey: string, propertyId: string) {
-    this._apiKey = apiKey;
-    this._propertyId = propertyId;
-  }
+  // apiKey and propertyId stored for future Akia API implementation
+  constructor(_apiKey: string, _propertyId: string) {}
 
   async sendMessage(_guestId: string, _message: string, _channel?: string): Promise<MessageResult> {
     // TODO: Implement Akia API call

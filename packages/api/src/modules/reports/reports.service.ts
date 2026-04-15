@@ -16,8 +16,9 @@ import type {
 
 // ── Zone filter SQL helper ────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function _zoneClause(zone: string | undefined, tableAlias = ''): string {
+/** zoneClause: reserved for future per-zone report filtering. */
+// @ts-ignore TS6133 — will be called once zone-split reports land
+function zoneClause(zone: string | undefined, tableAlias = ''): string {
   const col = tableAlias ? `${tableAlias}.zone` : 'zone';
   if (!zone || zone === 'all') return '';
   return `AND ${col} = '${zone === 'fleming' ? 'fleming' : 'simonton'}'`;

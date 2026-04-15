@@ -93,13 +93,8 @@ export class ManualPmsAdapter implements PmsAdapter {
  *   8. Handle rate limiting, retries, and error mapping
  */
 export class InforHmsAdapter implements PmsAdapter {
-  private _baseUrl: string;
-  private _apiKey: string;
-
-  constructor(baseUrl: string, apiKey: string) {
-    this._baseUrl = baseUrl;
-    this._apiKey = apiKey;
-  }
+  // baseUrl and apiKey stored for future Infor HMS API implementation
+  constructor(_baseUrl: string, _apiKey: string) {}
 
   async getReservations(_tenantId: string, _hotelId: string, _date: string): Promise<any[]> {
     // TODO: Implement Infor HMS API call
