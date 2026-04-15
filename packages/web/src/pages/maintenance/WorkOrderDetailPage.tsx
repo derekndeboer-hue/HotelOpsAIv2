@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { TimelineEntry } from '@/components/shared/TimelineEntry';
-import { PRIORITY_COLORS } from '@/utils/constants';
 import { formatDateTime, formatRelativeTime } from '@/utils/formatters';
 import type { WorkOrder, WOStatus } from '@/types';
 
