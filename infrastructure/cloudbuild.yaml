@@ -1,5 +1,4 @@
 substitutions:
-  _REGION: us-central1
   _REGISTRY: us-central1-docker.pkg.dev/${PROJECT_ID}/hotel-ops
   _WEB_BUCKET: ${PROJECT_ID}-hotel-ops-web
 
