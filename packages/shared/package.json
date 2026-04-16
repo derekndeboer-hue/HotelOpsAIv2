@@ -8,34 +8,13 @@
     "build": "tsc -p tsconfig.json"
   },
   "exports": {
-    "./types": {
-      "require": "./dist/types/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./constants": {
-      "require": "./dist/constants/index.js",
-      "types": "./dist/constants/index.d.ts"
-    },
-    "./validators": {
-      "require": "./dist/validators/index.js",
-      "types": "./dist/validators/index.d.ts"
-    },
-    "./validators/work-orders": {
-      "require": "./dist/validators/work-orders.js",
-      "types": "./dist/validators/work-orders.d.ts"
-    },
-    "./validators/housekeeping": {
-      "require": "./dist/validators/housekeeping.js",
-      "types": "./dist/validators/housekeeping.d.ts"
-    },
-    "./validators/reports": {
-      "require": "./dist/validators/reports.js",
-      "types": "./dist/validators/reports.d.ts"
-    },
-    "./validators/front-desk": {
-      "require": "./dist/validators/front-desk.js",
-      "types": "./dist/validators/front-desk.d.ts"
-    }
+    "./types": "./dist/types/index.js",
+    "./constants": "./dist/constants/index.js",
+    "./validators": "./dist/validators/index.js",
+    "./validators/work-orders": "./dist/validators/work-orders.js",
+    "./validators/housekeeping": "./dist/validators/housekeeping.js",
+    "./validators/reports": "./dist/validators/reports.js",
+    "./validators/front-desk": "./dist/validators/front-desk.js"
   },
   "dependencies": {
     "zod": "^3.22.4"
