@@ -1,28 +1,39 @@
-# Stage 1: Build
+# Build from monorepo root context: docker build -f packages/api/Dockerfile .
+
+# ── Stage 1: Build ────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
-
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci
+# Copy workspace manifests for layer caching
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/api/package.json ./packages/api/
 
-COPY tsconfig.json ./
-COPY src/ ./src/
+# Install workspace deps
+RUN npm ci --workspace=packages/shared --workspace=packages/api
 
-RUN npm run build
+# Copy source
+COPY packages/shared/ ./packages/shared/
+COPY packages/api/ ./packages/api/
 
-# Stage 2: Production
+# Build shared first (api runtime requires dist/), then api
+RUN npm run build -w packages/shared && npm run build -w packages/api
+
+# ── Stage 2: Production ───────────────────────────────────────────────────────
 FROM node:20-alpine
-
 WORKDIR /app
+ENV NODE_ENV=production
 
-COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/api/package.json ./packages/api/
 
-COPY --from=builder /app/dist ./dist
+RUN npm ci --workspace=packages/shared --workspace=packages/api --omit=dev
+
+# Copy compiled output for both packages
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/api/dist ./packages/api/dist
 
 EXPOSE 8080
-
 USER node
-
-CMD ["node", "dist/index.js"]
+CMD ["node", "packages/api/dist/index.js"]
