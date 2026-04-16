@@ -247,7 +247,7 @@ export async function processCheckIn(userId: string, data: CheckInInput) {
     });
 
     try {
-      await publishEvent(TOPICS.GUEST_CHECK_IN, {
+      await publishEvent(TOPICS.NOTIFICATION, {
         reservationId: data.reservationId,
         roomId: data.assignedRoomId,
         roomNumber: room.room_number,
@@ -326,7 +326,7 @@ export async function processCheckOut(userId: string, data: CheckOutInput) {
 
     // TODO: Pub/Sub wiring for GUEST_CHECK_OUT event (emit to housekeeping turn pipeline)
     try {
-      await publishEvent(TOPICS.GUEST_CHECK_OUT, {
+      await publishEvent(TOPICS.NOTIFICATION, {
         reservationId: data.reservationId,
         roomId: res.room_id,
         roomNumber: room.room_number,
@@ -551,7 +551,7 @@ export async function generateShiftHandoff(
   );
 
   try {
-    await publishEvent(TOPICS.SHIFT_HANDOFF, {
+    await publishEvent(TOPICS.NOTIFICATION, {
       hotelId,
       handoffId: id,
       shift,

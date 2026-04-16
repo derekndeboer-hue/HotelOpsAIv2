@@ -14,6 +14,53 @@ import * as workOrdersService from './work-orders.service';
 
 const router = Router();
 
+/** Normalize SQL snake_case row to camelCase WorkOrder shape for the frontend. */
+function normalizeWorkOrder(row: Record<string, unknown>): Record<string, unknown> {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    category: row.category,
+    priority: row.priority,
+    status: row.status,
+    roomId: row.room_id,
+    roomNumber: row.room_number,
+    locationId: row.location_id,
+    locationName: row.location_name,
+    locationType: row.location_type,
+    assignedTo: row.assigned_to,
+    assigneeName: row.assignee_first_name
+      ? `${row.assignee_first_name} ${row.assignee_last_name ?? ''}`.trim()
+      : null,
+    reportedByName: row.creator_first_name
+      ? `${row.creator_first_name} ${row.creator_last_name ?? ''}`.trim()
+      : null,
+    dueDate: row.due_date,
+    startedAt: row.started_at,
+    completedAt: row.completed_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    comments: Array.isArray(row.comments)
+      ? (row.comments as Record<string, unknown>[]).map((c) => ({
+          id: c.id,
+          text: c.content,
+          userName: c.first_name
+            ? `${c.first_name} ${c.last_name ?? ''}`.trim()
+            : 'System',
+          isSystem: c.is_system,
+          createdAt: c.created_at,
+        }))
+      : [],
+    photos: Array.isArray(row.photos)
+      ? (row.photos as Record<string, unknown>[]).map((p) => ({
+          id: p.id,
+          url: p.url,
+          caption: p.caption,
+        }))
+      : [],
+  };
+}
+
 router.use(authenticate, setTenantContext);
 
 router.post(
@@ -28,7 +75,8 @@ router.post(
       user.id,
       req.body,
     );
-    res.status(201).json(result);
+    const wo = await workOrdersService.getWorkOrder(user.tenantId, result.id);
+    res.status(201).json(normalizeWorkOrder(wo));
   }),
 );
 
@@ -45,7 +93,10 @@ router.get(
       user.role,
       parsed,
     );
-    res.json(result);
+    res.json({
+      ...result,
+      items: result.items.map(normalizeWorkOrder),
+    });
   }),
 );
 
@@ -65,7 +116,7 @@ router.get(
   asyncHandler(async (req: Request, res: Response) => {
     const user = (req as AuthenticatedRequest).user;
     const queue = await workOrdersService.getReviewQueue(user.tenantId, user.hotelId);
-    res.json(queue);
+    res.json(queue.map(normalizeWorkOrder));
   }),
 );
 
@@ -75,7 +126,7 @@ router.get(
   asyncHandler(async (req: Request, res: Response) => {
     const user = (req as AuthenticatedRequest).user;
     const wo = await workOrdersService.getWorkOrder(user.tenantId, req.params.id);
-    res.json(wo);
+    res.json(normalizeWorkOrder(wo));
   }),
 );
 
@@ -85,13 +136,14 @@ router.put(
   validate(updateWorkOrderSchema),
   asyncHandler(async (req: Request, res: Response) => {
     const user = (req as AuthenticatedRequest).user;
-    const result = await workOrdersService.updateWorkOrder(
+    await workOrdersService.updateWorkOrder(
       user.tenantId,
       req.params.id,
       user.id,
       req.body,
     );
-    res.json(result);
+    const wo = await workOrdersService.getWorkOrder(user.tenantId, req.params.id);
+    res.json(normalizeWorkOrder(wo));
   }),
 );
 
@@ -101,13 +153,15 @@ router.post(
   validate(workOrderCommentSchema),
   asyncHandler(async (req: Request, res: Response) => {
     const user = (req as AuthenticatedRequest).user;
-    const comment = await workOrdersService.addComment(
+    await workOrdersService.addComment(
       user.tenantId,
       req.params.id,
       user.id,
       req.body.content,
     );
-    res.status(201).json(comment);
+    // Return the full work order so the client can update its local state
+    const wo = await workOrdersService.getWorkOrder(user.tenantId, req.params.id);
+    res.status(201).json(normalizeWorkOrder(wo));
   }),
 );
 

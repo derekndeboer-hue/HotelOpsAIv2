@@ -36,6 +36,7 @@ export async function sendNotification(
 
   // Push to Firestore for real-time delivery
   try {
+    if (!firestore) return;
     const notifRef = firestore
       .collection('tenants')
       .doc(tenantId)
@@ -120,7 +121,7 @@ export async function getNotifications(
     WHERE tenant_id = $1 AND recipient_id = $2
   `;
   const params: any[] = [tenantId, userId];
-  let paramIdx = 3;
+  const paramIdx = 3;
 
   if (filters.unreadOnly) {
     sql += ' AND is_read = false';

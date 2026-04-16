@@ -6,7 +6,8 @@
   "workspaces": [
     "packages/shared",
     "packages/api",
-    "packages/web"
+    "packages/web",
+    "packages/realtime-sync"
   ],
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
@@ -20,7 +21,7 @@
     "test": "npm run test --workspaces --if-present",
     "test:api": "npm run test -w packages/api",
     "test:web": "npm run test -w packages/web",
-    "typecheck": "tsc --noEmit -p packages/shared/tsconfig.json && tsc --noEmit -p packages/api/tsconfig.json && tsc --noEmit -p packages/web/tsconfig.json",
+    "typecheck": "tsc --build packages/shared/tsconfig.json && tsc --noEmit -p packages/api/tsconfig.json && tsc --noEmit -p packages/web/tsconfig.json",
     "migrate": "node infrastructure/sql/run-migrations.js",
     "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules"
   },

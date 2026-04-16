@@ -1,16 +1,16 @@
 import { config } from './env';
 import fs from 'fs';
 import path from 'path';
+import * as gcpStorage from '@google-cloud/storage';
 
 const isLocalDev = !config.GCP_PROJECT_ID;
 
-let storage: any;
+let storageClient: gcpStorage.Storage | null = null;
 
 if (!isLocalDev) {
-  const gcp = require('@google-cloud/storage');
-  storage = new gcp.Storage({ projectId: config.GCP_PROJECT_ID });
+  storageClient = new gcpStorage.Storage({ projectId: config.GCP_PROJECT_ID });
 } else {
-  console.log('[Storage] Running in local mode — files saved to .local-uploads/');
+  console.warn('[Storage] Running in local mode — files saved to .local-uploads/');
   const uploadsDir = path.join(process.cwd(), '.local-uploads');
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -29,11 +29,11 @@ export async function uploadFile(
     const dir = path.dirname(localPath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(localPath, buffer);
-    console.log(`[Storage:local] Saved ${filePath} (${buffer.length} bytes)`);
+    console.warn(`[Storage:local] Saved ${filePath} (${buffer.length} bytes)`);
     return `http://localhost:${config.PORT}/local-uploads/${filePath}`;
   }
 
-  const bucket = storage.bucket(bucketName);
+  const bucket = storageClient!.bucket(bucketName);
   const file = bucket.file(filePath);
 
   await file.save(buffer, {
@@ -58,7 +58,7 @@ export async function getSignedUrl(
     return `http://localhost:${config.PORT}/local-uploads/${filePath}`;
   }
 
-  const bucket = storage.bucket(bucketName);
+  const bucket = storageClient!.bucket(bucketName);
   const file = bucket.file(filePath);
 
   const [url] = await file.getSignedUrl({
@@ -70,4 +70,4 @@ export async function getSignedUrl(
   return url;
 }
 
-export { storage };
+export const storage = storageClient;

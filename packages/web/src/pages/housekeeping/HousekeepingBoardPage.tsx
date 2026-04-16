@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
+import { collection, onSnapshot, query } from 'firebase/firestore';
 import { api } from '@/services/api';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -9,6 +10,8 @@ import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { Modal } from '@/components/ui/Modal';
 import { cn } from '@/utils/cn';
+import { useFirestore } from '@/context/FirestoreContext';
+import { useAuth } from '@/context/AuthContext';
 import type { RoomStatus } from '@/types';
 
 interface BoardRoom {
@@ -70,6 +73,9 @@ export function HousekeepingBoardPage() {
   const [selected, setSelected] = useState<BoardRoom | null>(null);
   const [mutating, setMutating] = useState(false);
 
+  const { db } = useFirestore();
+  const { user } = useAuth();
+
   const load = useCallback(() => {
     setError('');
     api.housekeeping
@@ -79,12 +85,33 @@ export function HousekeepingBoardPage() {
       .finally(() => setLoading(false));
   }, [zone]);
 
+  // Initial REST load for full board data (assignee names, cleaning types, etc.)
   useEffect(() => {
     setLoading(true);
     load();
-    const t = setInterval(load, 30000);
-    return () => clearInterval(t);
   }, [load]);
+
+  // Firestore subscription patches room statuses in real-time
+  useEffect(() => {
+    if (!db || !user) return;
+    const colPath = `hotels/${user.tenantId}_${user.hotelId}/rooms`;
+    const q = query(collection(db, colPath));
+    const unsub = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'modified' || change.type === 'added') {
+          const fsData = change.doc.data();
+          setRooms((prev) =>
+            prev.map((r) =>
+              r.room_number === change.doc.id
+                ? { ...r, status: fsData.status ?? r.status }
+                : r
+            )
+          );
+        }
+      });
+    });
+    return unsub;
+  }, [db, user]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};

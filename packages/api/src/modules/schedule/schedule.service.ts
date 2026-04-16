@@ -193,7 +193,7 @@ export async function publishSchedule(
   );
 
   try {
-    await publishEvent(TOPICS.SCHEDULE_PUBLISHED, {
+    await publishEvent(TOPICS.SCHEDULE_UPDATED, {
       tenantId, hotelId, scheduleId, userId,
       timestamp: new Date().toISOString(),
     });

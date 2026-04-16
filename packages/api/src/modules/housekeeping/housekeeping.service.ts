@@ -150,7 +150,7 @@ export async function createAssignments(
     }
 
     try {
-      await publishEvent(TOPICS.HOUSEKEEPING_ASSIGNED, {
+      await publishEvent(TOPICS.NOTIFICATION, {
         tenantId,
         hotelId,
         count: assignments.length,
@@ -336,7 +336,7 @@ export async function inspectRoom(
     }
 
     try {
-      await publishEvent(TOPICS.INSPECTION_RESULT, {
+      await publishEvent(TOPICS.NOTIFICATION, {
         tenantId,
         hotelId,
         assignmentId,
@@ -409,7 +409,7 @@ export async function completeClean(
     }
 
     try {
-      await publishEvent(TOPICS.HOUSEKEEPING_COMPLETED, {
+      await publishEvent(TOPICS.NOTIFICATION, {
         tenantId,
         hotelId,
         assignmentId,
@@ -739,7 +739,7 @@ export async function generateHousekeepingSchedule(
   });
 
   try {
-    await publishEvent(TOPICS.HOUSEKEEPING_ASSIGNED, {
+    await publishEvent(TOPICS.NOTIFICATION, {
       tenantId,
       hotelId,
       date,

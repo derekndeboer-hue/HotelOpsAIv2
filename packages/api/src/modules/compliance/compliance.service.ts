@@ -290,7 +290,7 @@ export async function runAlertEngine(tenantId: string, hotelId: string) {
     );
 
     try {
-      await publishEvent(TOPICS.COMPLIANCE_ALERT, {
+      await publishEvent(TOPICS.NOTIFICATION, {
         tenantId, hotelId,
         itemId: item.id,
         name: item.name,

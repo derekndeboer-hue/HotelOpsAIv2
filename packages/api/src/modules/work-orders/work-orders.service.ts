@@ -114,7 +114,7 @@ export async function createWorkOrder(
 
     // Publish event
     try {
-      await publishEvent(TOPICS.WORK_ORDER_CREATED, {
+      await publishEvent(TOPICS.WORK_ORDER_UPDATED, {
         tenantId,
         hotelId,
         workOrderId: id,
@@ -468,7 +468,16 @@ export async function getStats(tenantId: string, hotelId: string) {
     [tenantId, hotelId]
   );
 
-  return result.rows[0];
+  const row = result.rows[0];
+  return {
+    open: parseInt(row.open_count, 10) || 0,
+    inProgress: parseInt(row.in_progress_count, 10) || 0,
+    overdue: parseInt(row.overdue_count, 10) || 0,
+    urgentOpen: parseInt(row.urgent_count, 10) || 0,
+    completedToday: parseInt(row.completed_today, 10) || 0,
+    avgResponse: parseFloat(row.avg_response_hours_30d) || 0,
+    avgCompletion: parseFloat(row.avg_completion_hours_30d) || 0,
+  };
 }
 
 /**

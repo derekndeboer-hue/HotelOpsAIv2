@@ -16,9 +16,8 @@ import type {
 
 // ── Zone filter SQL helper ────────────────────────────────────────────────────
 
-/** zoneClause: reserved for future per-zone report filtering. */
-// @ts-ignore TS6133 — will be called once zone-split reports land
-function zoneClause(zone: string | undefined, tableAlias = ''): string {
+/** _zoneClause: reserved for future per-zone report filtering. */
+export function _zoneClause(zone: string | undefined, tableAlias = ''): string {
   const col = tableAlias ? `${tableAlias}.zone` : 'zone';
   if (!zone || zone === 'all') return '';
   return `AND ${col} = '${zone === 'fleming' ? 'fleming' : 'simonton'}'`;

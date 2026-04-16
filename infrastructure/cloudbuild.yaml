@@ -24,7 +24,8 @@ steps:
     args: ['run', 'test']
     waitFor: ['install']
 
-  - id: docker-build-push
+  # ── hotel-api image ────────────────────────────────────────────────────────
+  - id: build-api
     name: gcr.io/cloud-builders/docker
     args:
       - build
@@ -37,18 +38,65 @@ steps:
       - .
     waitFor: ['lint', 'typecheck', 'test']
 
-  - id: docker-push
+  - id: push-api
     name: gcr.io/cloud-builders/docker
     args:
       - push
       - --all-tags
       - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api
-    waitFor: ['docker-build-push']
+    waitFor: ['build-api']
 
+  - id: deploy-api
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - hotel-api
+      - --image=us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api:$SHORT_SHA
+      - --region=us-central1
+      - --project=$PROJECT_ID
+    waitFor: ['push-api']
+
+  # ── realtime-sync image ────────────────────────────────────────────────────
+  - id: build-realtime-sync
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/realtime-sync:$SHORT_SHA
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/realtime-sync:latest
+      - -f
+      - packages/realtime-sync/Dockerfile
+      - packages/realtime-sync
+    waitFor: ['lint', 'typecheck', 'test']
+
+  - id: push-realtime-sync
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/realtime-sync
+    waitFor: ['build-realtime-sync']
+
+  - id: deploy-realtime-sync
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - realtime-sync
+      - --image=us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/realtime-sync:$SHORT_SHA
+      - --region=us-central1
+      - --project=$PROJECT_ID
+    waitFor: ['push-realtime-sync']
+
+  # ── web ────────────────────────────────────────────────────────────────────
   - id: web-build
     name: node:20
     entrypoint: npm
-    args: ['run', 'build:web']
+    args: ['run', 'build', '-w', 'packages/web']
     waitFor: ['lint', 'typecheck', 'test']
 
   - id: web-deploy
@@ -65,6 +113,8 @@ steps:
 images:
   - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api:$SHORT_SHA
   - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/hotel-api:latest
+  - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/realtime-sync:$SHORT_SHA
+  - us-central1-docker.pkg.dev/$PROJECT_ID/hotel-ops/realtime-sync:latest
 
 options:
   logging: CLOUD_LOGGING_ONLY

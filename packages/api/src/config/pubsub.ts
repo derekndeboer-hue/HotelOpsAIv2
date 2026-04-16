@@ -1,32 +1,23 @@
 import { config } from './env';
+import * as gcpPubSub from '@google-cloud/pubsub';
 
 const isLocalDev = !config.GCP_PROJECT_ID;
 
-let pubsub: any;
+let pubsubClient: gcpPubSub.PubSub | null = null;
 
 if (!isLocalDev) {
-  const gcp = require('@google-cloud/pubsub');
-  pubsub = new gcp.PubSub({ projectId: config.GCP_PROJECT_ID });
+  pubsubClient = new gcpPubSub.PubSub({ projectId: config.GCP_PROJECT_ID });
 } else {
-  console.log('[PubSub] Running in local mode — events logged to console');
+  console.warn('[PubSub] Running in local mode — events logged to console');
 }
 
-// Topic name constants
+// Topic name constants — must match infrastructure/terraform/pubsub.tf
 export const TOPICS = {
-  ROOM_STATUS_CHANGED: 'room-status-changed',
-  WORK_ORDER_CREATED: 'work-order-created',
-  WORK_ORDER_UPDATED: 'work-order-updated',
-  GUEST_CHECK_IN: 'guest-check-in',
-  GUEST_CHECK_OUT: 'guest-check-out',
-  HOUSEKEEPING_ASSIGNED: 'housekeeping-assigned',
-  HOUSEKEEPING_COMPLETED: 'housekeeping-completed',
-  INSPECTION_RESULT: 'inspection-result',
-  SCHEDULE_PUBLISHED: 'schedule-published',
-  COMPLIANCE_ALERT: 'compliance-alert',
-  SHIFT_HANDOFF: 'shift-handoff',
-  URGENT_ALERT: 'urgent-alert',
-  EQUIPMENT_STATUS: 'equipment-status',
-  PM_DUE: 'pm-due',
+  ROOM_STATUS_CHANGED: 'room-status-changes',
+  WORK_ORDER_UPDATED: 'work-order-updates',
+  SCHEDULE_UPDATED: 'schedule-updates',
+  NOTIFICATION: 'notification-events',
+  REPORT_REQUEST: 'report-requests',
 } as const;
 
 /**
@@ -34,14 +25,14 @@ export const TOPICS = {
  */
 export async function publishEvent(
   topicName: string,
-  data: Record<string, any>
+  data: Record<string, unknown>
 ): Promise<string> {
-  if (isLocalDev) {
-    console.log(`[PubSub:local] ${topicName}:`, JSON.stringify(data).slice(0, 200));
+  if (isLocalDev || !pubsubClient) {
+    console.warn(`[PubSub:local] ${topicName}:`, JSON.stringify(data).slice(0, 200));
     return `local-msg-${Date.now()}`;
   }
 
-  const topic = pubsub.topic(topicName);
+  const topic = pubsubClient.topic(topicName);
   const messageBuffer = Buffer.from(JSON.stringify(data));
 
   try {
@@ -53,4 +44,4 @@ export async function publishEvent(
   }
 }
 
-export { pubsub };
+export const pubsub = pubsubClient;

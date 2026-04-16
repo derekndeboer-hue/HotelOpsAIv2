@@ -1,17 +1,15 @@
 import { config } from './env';
+import * as gcpFirestore from '@google-cloud/firestore';
 
 const isLocalDev = !config.GCP_PROJECT_ID;
 
-let firestore: any;
-let FieldValue: any;
+let firestoreClient: gcpFirestore.Firestore | null = null;
+const FieldValue = gcpFirestore.FieldValue;
 
 if (!isLocalDev) {
-  const gcp = require('@google-cloud/firestore');
-  firestore = new gcp.Firestore({ projectId: config.GCP_PROJECT_ID });
-  FieldValue = gcp.FieldValue;
+  firestoreClient = new gcpFirestore.Firestore({ projectId: config.GCP_PROJECT_ID });
 } else {
-  console.log('[Firestore] Running in local mode — changes logged to console');
-  FieldValue = { serverTimestamp: () => new Date().toISOString() };
+  console.warn('[Firestore] Running in local mode — changes logged to console');
 }
 
 /**
@@ -21,17 +19,15 @@ export async function updateRoomInFirestore(
   tenantId: string,
   hotelId: string,
   roomNumber: string,
-  data: Record<string, any>
+  data: Record<string, unknown>
 ): Promise<void> {
-  if (isLocalDev) {
-    console.log(`[Firestore:local] Room ${roomNumber} →`, JSON.stringify(data));
+  if (isLocalDev || !firestoreClient) {
+    console.warn(`[Firestore:local] Room ${roomNumber} →`, JSON.stringify(data));
     return;
   }
-  const docRef = firestore
-    .collection('tenants')
-    .doc(tenantId)
+  const docRef = firestoreClient
     .collection('hotels')
-    .doc(hotelId)
+    .doc(`${tenantId}_${hotelId}`)
     .collection('rooms')
     .doc(roomNumber);
 
@@ -60,11 +56,11 @@ export async function publishAlert(
     targetRoles?: string[];
   }
 ): Promise<void> {
-  if (isLocalDev) {
-    console.log(`[Firestore:local] Alert [${alert.severity}]: ${alert.title}`);
+  if (isLocalDev || !firestoreClient) {
+    console.warn(`[Firestore:local] Alert [${alert.severity}]: ${alert.title}`);
     return;
   }
-  const alertsRef = firestore
+  const alertsRef = firestoreClient
     .collection('tenants')
     .doc(tenantId)
     .collection('hotels')
@@ -92,11 +88,11 @@ export async function updateStaffPresence(
     lastSeen?: Date;
   }
 ): Promise<void> {
-  if (isLocalDev) {
-    console.log(`[Firestore:local] Staff ${staffId}: ${data.status || 'update'}`);
+  if (isLocalDev || !firestoreClient) {
+    console.warn(`[Firestore:local] Staff ${staffId}: ${data.status || 'update'}`);
     return;
   }
-  const docRef = firestore
+  const docRef = firestoreClient
     .collection('tenants')
     .doc(tenantId)
     .collection('hotels')
@@ -113,4 +109,5 @@ export async function updateStaffPresence(
   );
 }
 
-export { firestore };
+export const firestore = firestoreClient;
+export { FieldValue };
