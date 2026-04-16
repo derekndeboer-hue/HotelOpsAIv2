@@ -12,6 +12,9 @@ COPY packages/api/package.json ./packages/api/
 # Install workspace deps
 RUN npm ci --workspace=packages/shared --workspace=packages/api
 
+# Copy root tsconfig (shared/tsconfig.json extends ../../tsconfig.base.json)
+COPY tsconfig.base.json ./
+
 # Copy source
 COPY packages/shared/ ./packages/shared/
 COPY packages/api/ ./packages/api/
